@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Proyecto elisauria</title>
+  <style>
+    body { 
+      font-family: 'MiFuente'; 
+      background: #af0f0a; 
+      margin: 0; 
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .layout {
+  display: flex;/* izquierda - chat - derecha */
+  gap: 30px;
+  align-items: flex-start;   /* 🔹 Alinea todo arriba */
+  justify-content: center;
+  max-width: 1400px;
+  margin: 0 auto;
+    }
+    /* Chat */
+    .chat-container { 
+      flex: 0 0 400px;
+      height: 600px; 
+      background: #fff; 
+      color: black;
+      border-radius: 10px; 
+      box-shadow: 0 0 5px rgba(0,0,0,0.2); 
+      display: flex; 
+      flex-direction: column; 
+      overflow: hidden; 
+      position: relative;
+    }
+    .messages { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; }
+    .message { margin: 5px 0; padding: 8px 12px; border-radius: 15px; max-width: 70%; }
+    .sent { background: #dcf8c6; align-self: flex-end; }
+    .received { background: #f1f0f0; align-self: flex-start; }
+    .meta { font-size: 10px; color: gray; text-align: right; margin-top: 4px; }
+    .ticks { font-size: 12px; margin-left: 3px; }
+    .input-area { display: flex; padding: 10px; border-top: 1px solid #ddd; background: white; }
+    .emoji-btn { background: none; border: none; font-size: 20px; cursor: pointer; margin-right: 5px; }
+    .input-box { flex: 1; min-height: 30px; padding: 8px; border: 1px solid #ccc; border-radius: 20px; outline: none; display: flex; align-items: center; flex-wrap: wrap; }
+    .send { margin-left: 5px; border: none; background: #25d366; color: white; padding: 8px 15px; border-radius: 20px; cursor: pointer; }
+
+    /* Emojis */
+    .emoji-picker { position: absolute;
+       bottom: 60px; 
+       left: 0;
+        width: 100%;
+         height: 150px;
+          background: #fff;
+           border-top: 1px solid #ccc;
+            display: none;
+             flex-wrap: wrap;
+              gap: 10px;
+               padding: 15px;
+                overflow-y: auto; }
+    .emoji-picker img { width: 32px; height: 32px; object-fit: contain; cursor: pointer; }
+    .message img, .input-box img { width: 22px; height: 22px; vertical-align: middle; }
+
+    /* Columnas laterales */
+    .side-left {
+        flex: 0 0 500px;
+      display: flex ;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+      text-align: flex-start;
+      color: white;
+      justify-content: flex-start;
+    }
+    .side-right {
+        flex: 0 0 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      text-align: flex-start;
+      color: white;
+      
+    }
+    .side video {
+      max-width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+    .download-btn {
+      background: white;
+      color: #af0f0a;
+      padding: 12px 20px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    .download-btn:hover {
+      background: #f0f0f0;
+    }
+    .logo-img {
+  width: 450px;      /* siempre 500px */
+  height: auto;      
+}
+@font-face {
+  font-family: 'MiFuente';
+  src: url(fonts/Roboto_Condensed-Regular.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'MiFuente2';
+  src: url(fonts/Roboto-Thin.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+.titulos{
+  font-family: 'MiFuente';
+}
+.texto{
+  font-family: 'MiFuente2';
+}
+p{font-size: large;
+margin-top: auto;
+font-family: 'MiFuente';
+}
+h1{font-size: x-large;
+width: 330px;
+font-family: 'MiFuente';}
+h2{
+  font-size: x-large;
+  width: 400px;
+  font-family:'MiFuente2' ;
+}
+
+.video-container {
+  max-width: 500px; /* ancho máximo del video */
+  width: 90%;      /* ocupa el 100% del contenedor padre */
+  margin: 0 auto;   /* centra el video horizontalmente */
+  border: 0px solid black; /* borde alrededor del video */
+  border-radius: 20px;    /* esquinas redondeadas opcional */
+  overflow: hidden;       /* evita que el video sobresalga */
+  padding: 5px;           /* espacio entre video y borde */
+  margin-top: 65px;
+  
+}
+
+.video-container video {
+  width: 100%;    /* el video ocupa todo el contenedor */
+  display: block; /* elimina espacios indeseados debajo del video */
+}
+.emoji-categories {
+  display: flex;
+  justify-content: space-between; /* que se repartan en el ancho */
+  gap: 5px;
+  margin-bottom: 0px;
+}
+
+
+.emoji-categories button {
+  width: 50px;         /* tamaño fijo estándar */
+  height: 40px;        /* altura fija */
+  font-size: 16px;     /* iconos visibles pero no enormes */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f9f9f9;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.emoji-categories button:hover {
+  background: #eee;
+}
+
+.emoji-categories button.active {
+  background: #25d366;
+  color: white;
+  border-color: #1da851;
+}
+
+.emoji-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.emoji-grid img {
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+.categorias {
+  display: flex ;
+  justify-content: center;
+  gap: 30px; /* espacio entre los íconos */
+  margin: 20px 0;
+}
+
+.categoria {
+  text-align: center;
+}
+
+.categoria img {
+  width: 60px; /* ajusta tamaño */
+  height: auto;
+}
+
+
+.emoji-btn {
+  background: none;   /* quita fondo */
+  border: none;       /* quita borde */
+  cursor: pointer;    /* manito al pasar */
+  padding: 5px;
+}
+
+.emoji-btn img {
+  width: 25px;   /* ajusta el tamaño */
+  height: 25px;  /* mantiene proporción */
+}
+
+.recuadro {
+  position: relative;          /* 🔹 Necesario para que el número se posicione respecto a este bloque */
+  display: flex;
+  align-items: center;
+  background-color: #1aaa7d;   /* verde */
+  color: white;
+  padding: 15px 20px 15px 50px; /* 🔹 deja espacio a la izquierda para el número */
+  margin: 10px 0;
+  border-radius: 10px;
+  gap: 15px;
+  overflow: visible;         
+  height: 70px;  /* 🔹 permite que el número se salga */
+}
+.recuadro2 {
+  display: flex;
+  background-color: #1aaa7d;
+  color: white;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  padding: 15px 20px;
+  margin: 0;
+  margin-left: -40px;   /* 👈 corrige el padding del contenedor */
+  width: 350px;
+  align-items: center;
+  height: 90px;
+}
+
+.recuadro .numero {
+  position: absolute;
+  left: -20px;   /* 🔹 mueve el número hacia fuera */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 45px;   /* tamaño del número */
+  height: auto;
+}
+
+.recuadro .icono {
+  margin-left: auto;  /* 🔹 empuja el icono a la derecha */
+  width: 40px;
+  height: auto;
+}
+
+
+  </style>
+</head>
+<body>
+  <div class="layout">
+    
+    <!-- Izquierda -->
+    <div class="side-left">
+      <img src="LOGO.png" alt="Un pixel de identidad" class="logo-img">
+      <div class="recuadro2">
+      <h1>Diseño de símbolos digitales en representación de la cultura popular chilena. </h1>
+      </div>
+      <video class="video-container" controls>
+        <source src="videoemojis.mp4" type="video/mp4">
+        Tu navegador no soporta el video.
+      </video>
+    </div>
+
+    <!-- Centro (chat) -->
+    <div class="chat-container">
+      <div class="messages" id="messages"></div>
+      <div class="emoji-picker" id="emojiPicker">
+  <div class="emoji-categories">
+    <button data-category="todos" title="Todos los emojis"><img src="iconos/todo.png" alt=""></button>
+    <button data-category="flora"title="Flora y fauna"> <img src="iconos/flora y fauna.png" alt=""></button>
+    <button data-category="lenguaje" title="Lenguaje corporal" ><img src="iconos/lenguaje corporal.png" alt=""></button>
+    <button data-category="personajes" title="Personajes chilenos" ><img src="iconos/personajes chilenos.png" alt=""></button>
+    <button data-category="comida" title="Comidas típicas" ><img src="iconos/comidas típicas.png" alt=""></button>
+    <button data-category="cultura" title="Cultura material" ><img src="iconos/cultura material.png" alt=""></button>
+  </div>
+  <div class="emoji-grid" id="emojiGrid"></div>
+</div>
+
+      <div class="input-area">
+        <button class="emoji-btn" id="emojiToggle" >
+          <img src="iconos/emojisboton.png" alt=""></button>
+        <div id="messageInput" class="input-box" contenteditable="true"></div>
+        <button class="send" onclick="sendMessage()">Enviar</button>
+      </div>
+    </div>
+
+    <!-- Derecha -->
+    <div class="side-right">
+      <h2>65 emojis/stickers representativos de la chilenidad distribuidos en 5 categorías:</h2>
+      <div class="categorias">
+        <div class="categoria">
+          <img src="iconos/flora y fauna.png" alt="Flora y fauna">
+          <p>Flora y fauna</p>
+        </div>
+        <div class="categoria">
+          <img src="iconos/comidas típicas.png" alt="Comidas típicas">
+          <p>Comidas típicas</p>
+        </div>
+        <div class="categoria">
+          <img src="iconos/lenguaje corporal.png" alt="Lenguaje corporal">
+          <p>Lenguaje corporal</p>
+        </div>
+        <div class="categoria">
+          <img src="iconos/personajes chilenos.png" alt="Personajes chilenos">
+          <p>Personajes chilenos</p>
+        </div>
+        <div class="categoria">
+          <img src="iconos/cultura material.png" alt="Cultura material">
+          <p>Cultura material</p>
+        </div>
+      </div>
+      <!-- Recuadro 1 -->
+      <div class="recuadro verde">
+        <img class="numero" src="iconos/1.png" alt="Número 1">
+        <div>
+          <h3>Descargar StickerMaker</h3>
+          <p>Necesario para usar los packs de stickers</p>
+        </div>
+        <img class="icono" src="iconos/lapiz.png" alt="Icono lápiz">
+      </div>
+
+      <!-- Recuadro 2 -->
+      <div class="recuadro verde">
+        <img class="numero" src="iconos/2.png" alt="Número 2">
+        <div>
+          <h3>Descargar packs de stickers</h3>
+          <p>Ejecutalos, añádelos a WhatsApp y disfruta</p>
+        </div>
+        <img class="icono" src="iconos/drive.png" alt="Icono WhatsApp">
+      </div>
+
+
+
+    </div>
+
+  </div>
+
+<script>
+const messages = document.getElementById("messages");
+const input = document.getElementById("messageInput");
+const emojiPicker = document.getElementById("emojiPicker");
+const emojiToggle = document.getElementById("emojiToggle");
+
+function getTime() {
+  const now = new Date();
+  return now.getHours().toString().padStart(2,"0") + ":" + now.getMinutes().toString().padStart(2,"0");
+}
+function sendMessage() {
+  if (input.innerHTML.trim() === "") return;
+  const sent = document.createElement("div");
+  sent.className = "message sent";
+  sent.innerHTML = `<div>${input.innerHTML}</div><div class="meta">${getTime()} <span class="ticks">✔✔</span></div>`;
+  messages.appendChild(sent);
+  input.innerHTML = "";
+  messages.scrollTop = messages.scrollHeight;
+
+  setTimeout(() => {
+    const received = document.createElement("div");
+    received.className = "message received";
+    received.innerHTML = `<div>Recibido<img src="emojis/emoji26.png"></div><div class="meta">${getTime()}</div>`;
+    messages.appendChild(received);
+    messages.scrollTop = messages.scrollHeight;
+  }, 1000);
+}
+emojiToggle.addEventListener("click", () => {
+  emojiPicker.style.display = emojiPicker.style.display === "flex" ? "none" : "flex";
+});
+input.addEventListener("click", () => {
+  if (emojiPicker.style.display === "flex") {
+    emojiPicker.style.display = "none";
+  }
+});
+// Enviar mensaje con Enter
+// Enviar mensaje con Enter y salto con Shift+Enter
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault(); // evita el salto de línea
+    sendMessage();
+  }
+  // Si es Shift+Enter, no hacemos nada → se inserta salto de línea normal
+});
+
+
+const emojiGrid = document.getElementById("emojiGrid");
+
+const categories = {
+  todos: Array.from({ length: 65 }, (_, i) => i + 1),
+  flora: [1, 2, 16, 17, 27, 35, 40, 49, 50], 
+  lenguaje: [9, 10, 13, 14, 23, 24, 19, 25, 26, 34, 41, 42, 45, 46, 47, 59, 60],
+  personajes: [5, 6, 11, 12, 28, 29, 30, 31, 32, 36, 37, 44, 61, 62, 63],
+  comida: [3, 4, 15, 18, 21, 38, 39, 43, 48, 52, 53, 54, 55],
+  cultura: [7, 8, 20, 22, 33, 51, 56, 57, 58, 64, 65]
+};
+
+function loadCategory(cat) {
+  emojiGrid.innerHTML = "";
+  categories[cat].forEach(i => {
+    const img = document.createElement("img");
+    img.src = `emojis/emoji${i}.png`;
+    img.alt = `emoji${i}`;
+    img.addEventListener("click", () => {
+      input.innerHTML += `<img src="${img.src}" alt="emoji">`;
+    });
+    emojiGrid.appendChild(img);
+  });
+}
+
+document.querySelectorAll(".emoji-categories button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".emoji-categories button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    loadCategory(btn.dataset.category);
+  });
+});
+
+loadCategory("todos");
+document.querySelector("[data-category='todos']").classList.add("active");
+
+
+</script>
+</body>
+</html>
